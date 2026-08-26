@@ -4,7 +4,7 @@ import top_pkg::*;
 
 module spectrum_analyzer (
     input  logic       i_Clk_100,
-    input  logic       i_Reset,
+    input  logic       i_Resetn,
     output logic [3:0] o_VGA_R,
     output logic [3:0] o_VGA_G,
     output logic [3:0] o_VGA_B,
@@ -77,7 +77,7 @@ module spectrum_analyzer (
       .QFORMAT   (top_pkg::QFORMAT)
   ) fft_top_i (
       .i_Clk     (i_Clk_100),
-      .reset     (i_Reset),
+      .reset     (~i_Resetn),
       .i_tdata_re(w_tdata_re),
       .i_tdata_im(w_tdata_im),
       .i_tvalid  (w_tvalid),
