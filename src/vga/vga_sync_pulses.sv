@@ -1,14 +1,15 @@
+`timescale 1ns / 1ps
 module vga_sync_pulses #(
-    parameter int TOTAL_COLS  = 800,
-    parameter int TOTAL_ROWS  = 525,
-    parameter int ACTIVE_COLS = 640,
-    parameter int ACTIVE_ROWS = 480
+    parameter TOTAL_COLS  = 800,
+    parameter TOTAL_ROWS  = 525,
+    parameter ACTIVE_COLS = 640,
+    parameter ACTIVE_ROWS = 480
 ) (
-    input logic i_Clk,
-    output logic o_HSync,
-    output logic o_VSync,
-    output logic [9:0] o_Col_Count = 0,
-    output logic [9:0] o_Row_Count = 0
+    input i_Clk,
+    output o_HSync,
+    output o_VSync,
+    output reg [9:0] o_Col_Count = 0,
+    output reg [9:0] o_Row_Count = 0
 );
 
   always @(posedge i_Clk) begin

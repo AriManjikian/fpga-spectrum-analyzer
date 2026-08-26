@@ -1,5 +1,5 @@
 package vga;
-  localparam int VIDEO_WIDTH = 3;
+  localparam int VIDEO_WIDTH = 4;
   localparam int TOTAL_COLS = 800;
   localparam int TOTAL_ROWS = 525;
   localparam int ACTIVE_COLS = 640;
