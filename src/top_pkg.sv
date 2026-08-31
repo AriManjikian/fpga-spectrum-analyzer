@@ -1,7 +1,7 @@
 package top_pkg;
   localparam int DATA_WIDTH = 16;
   // FFT
-  localparam int NFFT = 512;
+  localparam int NFFT = 1024;
   localparam int DATA_DEPTH = NFFT;
   localparam int QFORMAT = 15;
   localparam int C_BFU_LATENCY = 12;

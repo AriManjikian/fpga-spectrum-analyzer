@@ -14,12 +14,16 @@ module fft_renderer #(
     output logic [top_pkg::VIDEO_WIDTH-1:0] o_Green_Video,
     output logic [top_pkg::VIDEO_WIDTH-1:0] o_Blue_Video
 );
+  localparam int PLOT_WIDTH = 512;
+  localparam int NUM_DISPLAY_BINS = NFFT / 2;
+  localparam int BIN_WIDTH = PLOT_WIDTH / NUM_DISPLAY_BINS;
+  localparam int BIN_SHIFT = $clog2(BIN_WIDTH);
 
   localparam int NUM_BINS = NFFT;
   localparam int ADDR_W = $clog2(NUM_BINS);
 
   localparam int PLOT_X_START = 64;
-  localparam int PLOT_WIDTH = 512;
+  // localparam int PLOT_WIDTH = 512;
 
   localparam int PLOT_BOTTOM_PAD = 48;
   localparam int PLOT_HEIGHT = 300;
@@ -27,8 +31,8 @@ module fft_renderer #(
   localparam int PLOT_Y_END = top_pkg::ACTIVE_ROWS - PLOT_BOTTOM_PAD;
   localparam int PLOT_Y_START = PLOT_Y_END - PLOT_HEIGHT;
 
-  localparam int BIN_WIDTH = PLOT_WIDTH / NFFT;
-  localparam int BIN_SHIFT = $clog2(BIN_WIDTH);
+  // localparam int BIN_WIDTH = PLOT_WIDTH / NFFT;
+  // localparam int BIN_SHIFT = $clog2(BIN_WIDTH);
 
   logic [    ADDR_W-1:0] w_addr;
   logic [    ADDR_W-1:0] r_addr;
@@ -42,7 +46,6 @@ module fft_renderer #(
   assign we     = i_fft_valid && (i_xk_index < NUM_BINS);
 
   // Read side (video render)
-  //
   logic in_plot;
   logic [9:0] plot_x;
 
@@ -54,7 +57,7 @@ module fft_renderer #(
 
   assign plot_x = i_Col_Count - PLOT_X_START;
 
-  assign r_addr = plot_x >> BIN_SHIFT;
+  assign r_addr = (NFFT / 2) + (plot_x >> BIN_SHIFT);
 
   // Writes get priority on the shared single port.
   assign addr_mux = we ? w_addr : r_addr;

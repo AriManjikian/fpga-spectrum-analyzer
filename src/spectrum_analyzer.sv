@@ -41,8 +41,8 @@ module spectrum_analyzer (
   );
 
   // PDM -> PCM decimation
-  logic [top_pkg::DATA_WIDTH-1:0] w_PCM_Sample;
-  logic                           w_PCM_Valid;
+  logic signed [top_pkg::DATA_WIDTH-1:0] w_PCM_Sample;
+  logic                                  w_PCM_Valid;
 
   pdm_to_pcm #(
       .DECIMATE (top_pkg::DECIMATE),
@@ -54,6 +54,16 @@ module spectrum_analyzer (
       .o_PCM_Sample(w_PCM_Sample),
       .o_PCM_Valid (w_PCM_Valid)
   );
+
+  // ila_0 ila_mic (
+  //     .clk(i_Clk_100),
+  //     .probe0(w_PCM_Valid),
+  //     .probe1(w_PDM_Bit),
+  //     .probe2(w_PDM_Valid),
+  //     .probe4(w_PCM_Sample),
+  //     .probe5(w_tdata_re),
+  //     .probe6(w_tdata_im)
+  // );
 
   // FFT front end
   logic signed [top_pkg::DATA_WIDTH-1:0] w_tdata_re;
@@ -70,6 +80,7 @@ module spectrum_analyzer (
   logic        [  top_pkg::DATA_WIDTH-1:0] w_mag_sq;
   logic        [$clog2(top_pkg::NFFT)-1:0] w_xk_index;
   logic                                    w_fft_tvalid;
+
 
   fft_top #(
       .NFFT      (top_pkg::NFFT),
@@ -88,6 +99,18 @@ module spectrum_analyzer (
       .o_xk_index(w_xk_index),
       .o_tvalid  (w_fft_tvalid)
   );
+
+  // ila_0 ila_fft (
+  //     .clk(i_Clk_100),
+  //     .probe0(w_fft_tvalid),
+  //     .probe1(w_tready),
+  //     .probe2(i_Resetn),
+  //     .probe3(w_tvalid),
+  //     .probe4(w_tdata_re_o),
+  //     .probe5(w_tdata_im_o),
+  //     .probe6(w_mag_sq),
+  //     .probe7(w_xk_index)
+  // );
 
   // VGA timing generator
   logic [9:0] w_Col_Count, w_Row_Count;
@@ -147,6 +170,7 @@ module spectrum_analyzer (
   end
 
   // FFT renderer
+  logic [3:0] w_Red_FFT, w_Green_FFT, w_Blue_FFT;
   fft_renderer #(
       .DATA_WIDTH(top_pkg::DATA_WIDTH),
       .NFFT      (top_pkg::NFFT)
@@ -157,8 +181,28 @@ module spectrum_analyzer (
       .i_xk_index   (w_xk_index),
       .i_Col_Count  (r_Col_Count_sync),
       .i_Row_Count  (r_Row_Count_sync),
-      .o_Red_Video  (w_Red_In),
-      .o_Green_Video(w_Green_In),
-      .o_Blue_Video (w_Blue_In)
+      .o_Red_Video  (w_Red_FFT),
+      .o_Green_Video(w_Green_FFT),
+      .o_Blue_Video (w_Blue_FFT)
   );
+
+  // Text Renderer
+  logic w_Text_Active;
+  logic [3:0] w_Red_Text, w_Green_Text, w_Blue_Text;
+
+  text_renderer #(
+      .SCALE(2  /* default 2 */)
+  ) text_renderer (
+      .i_Clk        (w_Clk_25),
+      .i_Col_Count  (w_Col_Count),
+      .i_Row_Count  (w_Row_Count),
+      .o_Text_Active(w_Text_Active),
+      .o_Red_Video  (w_Red_Text),
+      .o_Green_Video(w_Green_Text),
+      .o_Blue_Video (w_Blue_Text)
+  );
+
+  assign w_Red_In   = w_Text_Active ? w_Red_Text : w_Red_FFT;
+  assign w_Green_In = w_Text_Active ? w_Green_Text : w_Green_FFT;
+  assign w_Blue_In  = w_Text_Active ? w_Blue_Text : w_Blue_FFT;
 endmodule
